@@ -1,0 +1,11 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+project/
+target/
+*.log
+META-INF/*
+*.imi
+.idea/workspace.xml
