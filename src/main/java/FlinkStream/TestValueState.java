@@ -9,6 +9,8 @@ import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
@@ -138,6 +140,28 @@ public class TestValueState {
     public static void main(String[] args) throws Exception {
 
         LocalStreamEnvironment env = StreamExecutionEnvironment.createLocalEnvironment();
+
+        // 每 1000ms 开始一次 checkpoint
+        env.enableCheckpointing(1000);
+
+        // 设置模式为精确一次 (这是默认值)
+        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+
+        // 确认 checkpoints 之间的时间会进行 500 ms
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(500);
+
+        // Checkpoint 必须在一分钟内完成，否则就会被抛弃
+        env.getCheckpointConfig().setCheckpointTimeout(60000);
+
+        // 同一时间只允许一个 checkpoint 进行
+        env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
+
+        // 开启在 job 中止后仍然保留的 externalized checkpoints
+        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+
+        // 允许在有更近 savepoint 时回退到 checkpoint
+        env.getCheckpointConfig().setPreferCheckpointForRecovery(true);
+
 
         // this can be used in a streaming program like this (assuming we have a StreamExecutionEnvironment env)
         env.fromElements(Tuple2.of(1L, 3L), Tuple2.of(1L, 5L), Tuple2.of(1L, 7L), Tuple2.of(1L, 4L), Tuple2.of(1L, 2L))
