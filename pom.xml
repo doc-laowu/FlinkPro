@@ -24,7 +24,7 @@
         <flink.version>1.10.0</flink.version>
         <scala.version>2.11</scala.version>
         <vertx.jdbc.version>3.5.2</vertx.jdbc.version>
-        <jdbc.version>8.0.17</jdbc.version>
+        <jdbc.version>8.0.28</jdbc.version>
     </properties>
 
     <dependencies>
